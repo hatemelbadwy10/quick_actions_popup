@@ -21,8 +21,20 @@ void showIOSQuickActions({
   final Offset triggerOffset = renderBox.localToGlobal(Offset.zero);
   final Size triggerSize = renderBox.size;
 
-  // Default configuration
+  // Ensure popup is within screen bounds
+  final screenHeight = MediaQuery.of(context).size.height;
+  final double popupHeight = options.length * 48.0 + 24.0; // estimated height
+  double safeY = triggerOffset.dy;
+
+  // Push the popup up if it's too close to the bottom
+  if ((triggerOffset.dy + popupHeight) > screenHeight) {
+    safeY = screenHeight - popupHeight - 16;
+  }
+
+  final Offset adjustedOffset = Offset(triggerOffset.dx, safeY);
+
   final effectiveConfig = config ?? const QuickActionsConfig();
+
 
   showDialog(
     context: context,
@@ -31,7 +43,7 @@ void showIOSQuickActions({
     builder: (dialogContext) {
       return QuickActionsDialog(
         triggerWidget: triggerWidget,
-        triggerOffset: triggerOffset,
+        triggerOffset: adjustedOffset,
         triggerSize: triggerSize,
         options: options,
         onTriggerTap: onTriggerTap,
