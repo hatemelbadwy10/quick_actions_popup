@@ -5,7 +5,7 @@ import '../models/quick_action_option.dart';
 import 'option_card.dart';
 
 class QuickActionsDialog extends StatelessWidget {
-  final Widget triggerWidget;
+  final Widget? triggerWidget;
   final Offset triggerOffset;
   final Size triggerSize;
   final List<QuickActionOption> options;
@@ -15,7 +15,7 @@ class QuickActionsDialog extends StatelessWidget {
   final Alignment? popupAlignment;
 
   const QuickActionsDialog({super.key,
-    required this.triggerWidget,
+    this.triggerWidget,
     required this.triggerOffset,
     required this.triggerSize,
     required this.options,
@@ -75,20 +75,21 @@ class QuickActionsDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Trigger widget (clickable)
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  if (onTriggerTap != null) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      onTriggerTap!();
-                    });
-                  }
-                },
-                child: triggerWidget,
-              ),
+              // Trigger widget (clickable) - only show if available
+              if (triggerWidget != null)
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    if (onTriggerTap != null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        onTriggerTap!();
+                      });
+                    }
+                  },
+                  child: triggerWidget!,
+                ),
 
-              const SizedBox(height: 8),
+              if (triggerWidget != null) const SizedBox(height: 8),
 
               // Options card
               if (options.isNotEmpty)

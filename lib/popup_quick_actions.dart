@@ -6,7 +6,7 @@ import 'models/quick_action_option.dart';
 /// Main function to show the iOS-style quick actions popup
 void showIOSQuickActions({
   required BuildContext context,
-  required Widget triggerWidget,
+  Widget? triggerWidget,
   required List<QuickActionOption> options,
   VoidCallback? onTriggerTap,
   QuickActionsConfig? config,
@@ -43,16 +43,18 @@ void showIOSQuickActions({
   );
 }
 
+
 // Extension method for easier usage
 extension QuickActionsExtension on BuildContext {
   void showQuickActions({
-    required Widget triggerWidget,
+    Widget? triggerWidget,
     required List<QuickActionOption> options,
     VoidCallback? onTriggerTap,
     QuickActionsConfig? config,
     bool dismissOnOptionTap = true,
     bool barrierDismissible = true,
     Alignment? popupAlignment,
+    bool autoCaptureTrigger = true,
   }) {
     showIOSQuickActions(
       context: this,
