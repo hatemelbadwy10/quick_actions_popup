@@ -25,12 +25,12 @@ void showIOSQuickActions({
   final Size screenSize = mediaQuery.size;
   final EdgeInsets padding = mediaQuery.padding;
 
-  // Use trigger width for popup width (this is the key change!)
-  final double popupWidth = triggerSize.width;
 
-  // Estimate popup height based on options
+
+  // Estimate popup dimensions
   const double itemHeight = 48.0;
   const double popupPadding = 24.0;
+  const double popupWidth = 200.0;
   final double popupHeight = (options.length * itemHeight) + popupPadding;
 
   // Calculate the best position for the popup
@@ -41,8 +41,8 @@ void showIOSQuickActions({
     screenSize: screenSize,
     padding: padding,
   );
-
   final effectiveConfig = config ?? const QuickActionsConfig();
+
 
   showDialog(
     context: context,
@@ -62,7 +62,6 @@ void showIOSQuickActions({
     },
   );
 }
-
 Offset _calculateOptimalPosition({
   required Offset triggerOffset,
   required Size triggerSize,
@@ -70,52 +69,53 @@ Offset _calculateOptimalPosition({
   required Size screenSize,
   required EdgeInsets padding,
 }) {
-  // Calculate available space
-  final double availableHeight = screenSize.height - padding.top - padding.bottom;
-
-  // Ensure popup height fits within available space
-  final double clampedPopupHeight = popupSize.height.clamp(0.0, availableHeight);
-
-  // Horizontal positioning: Always align with trigger's left edge
-  // This makes the popup have the same width and position as the trigger
   double x = triggerOffset.dx;
-
-  // Vertical positioning logic
   double y = triggerOffset.dy;
-  const double gap = 8.0;
 
-  // Calculate spaces available above and below trigger
-  final double spaceAbove = triggerOffset.dy - padding.top;
-  final double spaceBelow = screenSize.height - padding.bottom - (triggerOffset.dy + triggerSize.height);
+  // Horizontal positioning
+  // Try to align popup to the right of trigger first
+  if (x + popupSize.width > screenSize.width - padding.right) {
+    // If popup goes off right edge, align to left of trigger
+    x = triggerOffset.dx + triggerSize.width - popupSize.width;
 
-  // Try positioning below first (preferred)
-  final double belowY = triggerOffset.dy + triggerSize.height + gap;
-  if (spaceBelow >= clampedPopupHeight + gap) {
-    y = belowY;
-  }
-  // Try positioning above
-  else if (spaceAbove >= clampedPopupHeight + gap) {
-    y = triggerOffset.dy - clampedPopupHeight - gap;
-  }
-  // If neither fits perfectly, choose the side with more space
-  else {
-    if (spaceBelow >= spaceAbove) {
-      // Position below, but clamp to screen
-      y = (screenSize.height - padding.bottom - clampedPopupHeight).clamp(
-          belowY,
-          screenSize.height - padding.bottom - clampedPopupHeight
-      );
-    } else {
-      // Position above, but clamp to screen
-      y = (triggerOffset.dy - clampedPopupHeight - gap).clamp(
-          padding.top,
-          triggerOffset.dy - gap
-      );
+    // If still off screen, clamp to screen edge
+    if (x < padding.left) {
+      x = padding.left;
     }
   }
 
-  // Final safety clamp for vertical position only
-  y = y.clamp(padding.top, screenSize.height - padding.bottom - clampedPopupHeight);
+  // Vertical positioning with priority to stay near trigger
+  // First, try positioning below the trigger
+  double belowY = triggerOffset.dy + triggerSize.height + 8.0; // 8px gap
+
+  // Check if popup fits below
+  if (belowY + popupSize.height <= screenSize.height - padding.bottom) {
+    y = belowY;
+  } else {
+    // Try positioning above the trigger
+    double aboveY = triggerOffset.dy - popupSize.height - 8.0; // 8px gap
+
+    if (aboveY >= padding.top) {
+      y = aboveY;
+    } else {
+      // If neither above nor below works, find the best vertical position
+      // that shows the most content while staying near the trigger
+
+      double spaceAbove = triggerOffset.dy - padding.top;
+      double spaceBelow = screenSize.height - padding.bottom - (triggerOffset.dy + triggerSize.height);
+
+      if (spaceBelow >= spaceAbove) {
+        // More space below, position as low as possible while staying on screen
+        y = screenSize.height - padding.bottom - popupSize.height;
+      } else {
+        // More space above, position at the top
+        y = padding.top;
+      }
+
+      // Ensure we don't go off screen
+      y = y.clamp(padding.top, screenSize.height - padding.bottom - popupSize.height);
+    }
+  }
 
   return Offset(x, y);
 }
