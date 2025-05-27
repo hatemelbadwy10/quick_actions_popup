@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../models/configs_model.dart';
 import '../models/quick_action_option.dart';
 
@@ -8,7 +7,8 @@ class OptionsCard extends StatelessWidget {
   final QuickActionsConfig config;
   final bool dismissOnOptionTap;
 
-  const OptionsCard({super.key,
+  const OptionsCard({
+    super.key,
     required this.options,
     required this.config,
     required this.dismissOnOptionTap,
@@ -16,24 +16,28 @@ class OptionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: config.cardWidth ?? 200,
-      padding: config.padding ?? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        color: config.backgroundColor ?? Colors.white,
-        borderRadius: config.borderRadius ?? BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: config.optionsAlignment ?? MainAxisAlignment.start,
-        crossAxisAlignment: config.optionsCrossAlignment ?? CrossAxisAlignment.start,
-        children: _buildOptionWidgets(context),
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: config.cardWidth ?? 200, // Fixed width
+        padding: config.padding ?? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          color: config.backgroundColor ?? Colors.white,
+          borderRadius: config.borderRadius ?? BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: config.optionsAlignment ?? MainAxisAlignment.start,
+          crossAxisAlignment: config.optionsCrossAlignment ?? CrossAxisAlignment.start,
+          children: _buildOptionWidgets(context),
+        ),
       ),
     );
   }
@@ -43,7 +47,6 @@ class OptionsCard extends StatelessWidget {
 
     for (int i = 0; i < options.length; i++) {
       final option = options[i];
-
       widgets.add(
         GestureDetector(
           onTap: () {
@@ -57,8 +60,10 @@ class OptionsCard extends StatelessWidget {
             }
           },
           child: Container(
+            width: double.infinity, // Take full available width
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Row(
+              mainAxisSize: MainAxisSize.min, // Use minimum space needed
               children: [
                 Icon(
                   option.icon,
@@ -66,7 +71,7 @@ class OptionsCard extends StatelessWidget {
                   color: option.iconColor ?? Theme.of(context).primaryColor,
                 ),
                 const SizedBox(width: 12),
-                Expanded(
+                Flexible( // Changed from Expanded to Flexible
                   child: Text(
                     option.label,
                     style: config.textStyle?.copyWith(
@@ -75,6 +80,7 @@ class OptionsCard extends StatelessWidget {
                       fontSize: config.fontSize ?? 14,
                       color: option.textColor ?? Theme.of(context).textTheme.bodyMedium?.color,
                     ),
+                    overflow: TextOverflow.ellipsis, // Handle long text
                   ),
                 ),
               ],
